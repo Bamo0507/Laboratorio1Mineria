@@ -1,0 +1,25 @@
+---
+title: "Laboratorio 1 - Películas"
+author: "Bryan Martínez"
+date: "2026-02-02"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Laboratorio 1 - CineVision Studios
+
+```{r}
+movies <- read.csv("movies_2026.csv")
+movies_cuant <- movies[sapply(movies, is.numeric)]
+movies_cual <- movies[sapply(movies, function(x) !is.numeric(x))]
+```
+
+## Exploración de Datos
+
+## Clasificación de Variables
+
+## Análisis de Frecuencia/Distribución
+
