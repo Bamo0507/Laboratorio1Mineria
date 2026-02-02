@@ -21,15 +21,29 @@ movies_cual <- movies[sapply(movies, function(x) !is.numeric(x))]
 
 ```{r}
 # Dimensión del conjunto de datos
-dim(movies)
+dim(movies) #<-- Cuántas filas y columnas tiene el dataset
+
+
 
 # Estructura de los datos
-str(movies)
+str(movies) #<--- Tipo de variables (numéricas, categóricas, texto, etc.)
 
 # Resumen estadístico general
-summary(movies)
+summary(movies) #<-- Exploración rápida:  - Mínimo, máximo, media, mediana (variables numéricas)  - Frecuencias (variables categóricas)\
+
+#Conclusion: A partir de la exploración inicial del conjunto de datos se observa que el dataset contiene **19,883 observaciones y 28 variables**, lo que representa un volumen de datos considerable para el análisis.
+
+#La estructura del conjunto de datos muestra una **combinación de variables numéricas, lógicas y de tipo carácter**. Las variables de tipo carácter predominan en campos descriptivos como *géneros, director, actores, títulos, idioma original y países de producción*, lo cual indica que gran parte de la información es cualitativa y requiere procesos adicionales de limpieza o transformación para análisis más avanzados.
+
+#Las variables numéricas incluyen información relevante como *presupuesto, ingresos, duración, popularidad, calificación promedio y conteo de votos*. Se observa que varias de estas variables presentan **valores mínimos iguales a cero**, especialmente en *budget, revenue, voteAvg y voteCount*, lo que sugiere la existencia de películas sin información financiera o de votación registrada.
+
+#El resumen estadístico también evidencia la presencia de **valores extremos**, por ejemplo en *budget, revenue, actorsAmount, castWomenAmount y castMenAmount*, lo cual podría influir en medidas como la media y requerir el uso de medidas robustas como la mediana en análisis posteriores.
+
+#Finalmente, se identifican **valores faltantes (NA)** en algunas variables, como *video, castWomenAmount, castMenAmount y releaseYear*, por lo que será necesario considerar técnicas de manejo de datos faltantes antes de realizar análisis más profundos.
+
+
 ```
-## Clasificación de Variables
+## Clasificación de Variables  
 
 ## Análisis de Frecuencia/Distribución
 
