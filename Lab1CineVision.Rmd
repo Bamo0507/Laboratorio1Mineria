@@ -19,6 +19,16 @@ movies_cual <- movies[sapply(movies, function(x) !is.numeric(x))]
 
 ## Exploración de Datos
 
+```{r}
+# Dimensión del conjunto de datos
+dim(movies)
+
+# Estructura de los datos
+str(movies)
+
+# Resumen estadístico general
+summary(movies)
+```
 ## Clasificación de Variables
 
 ## Análisis de Frecuencia/Distribución
