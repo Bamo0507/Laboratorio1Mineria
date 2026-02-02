@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(nortest)
 ```
 
 # Laboratorio 1 - CineVision Studios
@@ -43,7 +44,185 @@ summary(movies) #<-- Exploración rápida:  - Mínimo, máximo, media, mediana (
 
 
 ```
-## Clasificación de Variables  
+
+## Clasificación de Variables
+
+| Variable                  | Tipo         | Subtipo  |
+|---------------------------|--------------|----------|
+| id                        | Cualitativa  | Nominal  |
+| originalTitle             | Cualitativa  | Nominal  |
+| originalLanguage          | Cualitativa  | Nominal  |
+| title                     | Cualitativa  | Nominal  |
+| homePage                  | Cualitativa  | Nominal  |
+| video                     | Cualitativa  | Nominal  |
+| director                  | Cualitativa  | Nominal  |
+| genres                    | Cualitativa  | Nominal  |
+| productionCompany         | Cualitativa  | Nominal  |
+| productionCompanyCountry  | Cualitativa  | Nominal  |
+| productionCountry         | Cualitativa  | Nominal  |
+| actors                    | Cualitativa  | Nominal  |
+| actorsCharacter           | Cualitativa  | Nominal  |
+| genresAmount              | Cuantitativa | Discreta |
+| productionCoAmount        | Cuantitativa | Discreta |
+| productionCountriesAmount | Cuantitativa | Discreta |
+| voteCount                 | Cuantitativa | Discreta |
+| actorsAmount              | Cuantitativa | Discreta |
+| castWomenAmount           | Cuantitativa | Discreta |
+| castMenAmount             | Cuantitativa | Discreta |
+| releaseYear               | Cuantitativa | Discreta |
+| popularity                | Cuantitativa | Continua |
+| budget                    | Cuantitativa | Continua |
+| revenue                   | Cuantitativa | Continua |
+| runtime                   | Cuantitativa | Continua |
+| voteAvg                   | Cuantitativa | Continua |
+| actorsPopularity          | Cuantitativa | Continua |
+| releaseDate               | Cualitativa  | Ordinal  |
 
 ## Análisis de Frecuencia/Distribución
 
+#### Distribuciones
+
+H0: La variable sigue una distribución normal H1: La variable NO sigue una distribución normal
+
+```{r}
+lillie_results <- lapply(movies_cuant, lillie.test)
+```
+
+**budget**
+
+```{r}
+hist(movies_cuant$budget)
+lillie_results$budget
+```
+
+-   La distribución no es normal, gráficamente se visualiza un sesgo considerable hacia la izquierda. Adicionalmente, el p-value es de 2.2e-16, confirma el rechazo de la normalidad.
+
+**revenue**
+
+```{r}
+hist(movies_cuant$revenue)
+lillie_results$revenue
+```
+
+-   Igual que con la variable "budget", gráficamente se identifica un sesgo hacia la izquierda, y al p-value ser de 2.2e-16 se dice que no tiene una distribución normal.
+
+**runtime**
+
+```{r}
+hist(movies_cuant$runtime)
+lillie_results$runtime
+```
+
+-   Gráficamente se identifica un sesgo hacia la izquierda, y el p-value es de 2.2e-16 por lo que se dice que no sigue una distribución normal.
+
+**popularity**
+
+```{r}
+hist(movies_cuant$popularity)
+lillie_results$popularity
+```
+
+-   Se evidencia que el gráfico está sesgado hacia la izquierda, y el valor-p es 2.2e-16 por lo que se dice que no sigue una distribución normal.
+
+**voteAvg**
+
+```{r}
+hist(movies_cuant$voteAvg)
+lillie_results$voteAvg
+```
+
+-   Gráficamente se ve que se tiene una alta concentración en los valores bajos, y otros están alrededor de y 8. Además, el p-value es de 2.2e-16 por lo que se rechaza que tenga distribución normal.
+
+**voteCount**
+
+```{r}
+hist(movies_cuant$voteCount)
+lillie_results$voteCount
+```
+
+-   El gráfico se ve sesgado a la izquierda, y el p-value es de 2.2e-16 por lo que no tiene uns distribución normal.
+
+**genresAmount**
+
+```{r}
+hist(movies_cuant$genresAmount)
+lillie_results$genresAmount
+```
+
+-   En el gráfico se ve que los datos están concentrados hacia la izquierda, y el p-value 2.2e-16 indica que no es una distribución normal.
+
+**productionCoAmount**
+
+```{r}
+hist(movies_cuant$productionCoAmount)
+lillie_results$productionCoAmount
+```
+
+-   Los datos están considerablemente sesgados a la izquierda en el gráfico, y el p-value es 2.2e-16 entonces no hay distribución normal.
+
+**productionCountriesAmount**
+
+```{r}
+hist(movies_cuant$productionCountriesAmount)
+lillie_results$productionCountriesAmount
+```
+
+-   Una vez más los datos están sesgados a la izquierda y el p-value es de 2.2e-16 por lo que se dice que no tiene una distribución normal.
+
+**actorsAmount**
+
+```{r}
+hist(movies_cuant$actorsAmount)
+lillie_results$actorsAmount
+```
+
+-   Los datos están sesgados a la izquierda y el p-value es de 2.2e-16, entonces no hay distribución normal.
+
+**castWomenAmount**
+
+```{r}
+hist(movies_cuant$castWomenAmount)
+lillie_results$castWomenAmount
+```
+
+-   Gráficamente los datos están concentrados a la izquierda y el p-value es de 2.2e-16 por lo que no hay distribución normal.
+
+**castMenAmount**
+
+```{r}
+hist(movies_cuant$castMenAmount)
+lillie_results$castMenAmount
+```
+
+-   Se evidencia que el gráfico está sesgado hacia la izquierda, y el valor-p es 2.2e-16 por lo que se dice que no sigue una distribución normal.
+
+**releaseYear**
+
+```{r}
+hist(movies_cuant$releaseYear)
+lillie_results$releaseYear
+```
+
+-   Los datos están sesgados hacia la derecha en el gráfico y el p-value es de 2.2e-16, por lo que la distribución no es normal.
+
+> Cabe mencionar que actorsPopularity no se le sacó distribución por cómo se tienen los datos, pues viene como un conjunto de números separados por \|.
+
+------------------------------------------------------------------------
+
+#### Frecuencia
+
+```{r}
+freqs <- lapply(movies_cual, table)
+freqs$genres
+freqs$homePage
+freqs$productionCompany
+freqs$productionCompanyCountry
+freqs$video
+freqs$director
+freqs$actors
+freqs$actorsCharacter
+freqs$originalTitle
+freqs$title
+freqs$originalLanguage
+freqs$releaseDate
+```
