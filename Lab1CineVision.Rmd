@@ -8,14 +8,50 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(nortest)
+library(dplyr)
+library(stringr)
+library(tidyr)
+library(readr)
 ```
 
 # Laboratorio 1 - CineVision Studios
 
 ```{r}
-movies <- read.csv("movies_2026.csv")
+# Helpers para columnas con "|"
+split_pipe <- function(x) {
+  if (is.na(x) || x == "") return(character(0))
+  parts <- unlist(strsplit(x, "\\|"))
+  parts <- trimws(parts)
+  parts[parts != ""]
+}
+
+split_pipe_num <- function(x) {
+  nums <- suppressWarnings(as.numeric(split_pipe(x)))
+  nums[!is.na(nums)]
+}
+
+safe_mean <- function(x) if (length(x) == 0) NA_real_ else mean(x, na.rm = TRUE)
+
+movies_raw <- read.csv(
+  "movies_2026.csv",
+  fileEncoding = "latin1",
+  stringsAsFactors = FALSE
+)
+
+movies <- movies_raw %>%
+  mutate(
+    # ceros por ausencia de información
+    # validar con erick
+    #budget  = ifelse(budget  == 0, NA, budget),
+    #revenue = ifelse(revenue == 0, NA, revenue),
+    #voteAvg = ifelse(voteCount == 0, NA, voteAvg),
+
+    # actorsPopularity -> métricas (para manejar 3.45|12.31|...)
+    actorsPopularity_mean = sapply(lapply(actorsPopularity, split_pipe_num), safe_mean),
+  )
+
 movies_cuant <- movies[sapply(movies, is.numeric)]
-movies_cual <- movies[sapply(movies, function(x) !is.numeric(x))]
+movies_cual  <- movies[sapply(movies, function(x) !is.numeric(x))]
 ```
 
 ## Exploración de Datos
@@ -24,26 +60,24 @@ movies_cual <- movies[sapply(movies, function(x) !is.numeric(x))]
 # Dimensión del conjunto de datos
 dim(movies) #<-- Cuántas filas y columnas tiene el dataset
 
-
-
 # Estructura de los datos
 str(movies) #<--- Tipo de variables (numéricas, categóricas, texto, etc.)
 
 # Resumen estadístico general
 summary(movies) #<-- Exploración rápida:  - Mínimo, máximo, media, mediana (variables numéricas)  - Frecuencias (variables categóricas)\
-
-#Conclusion: A partir de la exploración inicial del conjunto de datos se observa que el dataset contiene **19,883 observaciones y 28 variables**, lo que representa un volumen de datos considerable para el análisis.
-
-#La estructura del conjunto de datos muestra una **combinación de variables numéricas, lógicas y de tipo carácter**. Las variables de tipo carácter predominan en campos descriptivos como *géneros, director, actores, títulos, idioma original y países de producción*, lo cual indica que gran parte de la información es cualitativa y requiere procesos adicionales de limpieza o transformación para análisis más avanzados.
-
-#Las variables numéricas incluyen información relevante como *presupuesto, ingresos, duración, popularidad, calificación promedio y conteo de votos*. Se observa que varias de estas variables presentan **valores mínimos iguales a cero**, especialmente en *budget, revenue, voteAvg y voteCount*, lo que sugiere la existencia de películas sin información financiera o de votación registrada.
-
-#El resumen estadístico también evidencia la presencia de **valores extremos**, por ejemplo en *budget, revenue, actorsAmount, castWomenAmount y castMenAmount*, lo cual podría influir en medidas como la media y requerir el uso de medidas robustas como la mediana en análisis posteriores.
-
-#Finalmente, se identifican **valores faltantes (NA)** en algunas variables, como *video, castWomenAmount, castMenAmount y releaseYear*, por lo que será necesario considerar técnicas de manejo de datos faltantes antes de realizar análisis más profundos.
-
-
 ```
+
+Conclusion: A partir de la exploración inicial del conjunto de datos se observa que el dataset contiene **19,883 observaciones y 28 variables**, lo que representa un volumen de datos considerable para el análisis.
+
+La estructura del conjunto de datos muestra una **combinación de variables numéricas, lógicas y de tipo carácter**. Las variables de tipo carácter predominan en campos descriptivos como *géneros, director, actores, títulos, idioma original y países de producción*, lo cual indica que gran parte de la información es cualitativa y requiere procesos adicionales de limpieza o transformación para análisis más avanzados.
+
+Las variables numéricas incluyen información relevante como *presupuesto, ingresos, duración, popularidad, calificación promedio y conteo de votos*. Se observa que varias de estas variables presentan **valores mínimos iguales a cero**, especialmente en *budget, revenue, voteAvg y voteCount*, lo que sugiere la existencia de películas sin información financiera o de votación registrada.
+
+El resumen estadístico también evidencia la presencia de **valores extremos**, por ejemplo en *budget, revenue, actorsAmount, castWomenAmount y castMenAmount*, lo cual podría influir en medidas como la media y requerir el uso de medidas robustas como la mediana en análisis posteriores.
+
+Finalmente, se identifican **valores faltantes (NA)** en algunas variables, como *video, castWomenAmount, castMenAmount y releaseYear*, por lo que será necesario considerar técnicas de manejo de datos faltantes antes de realizar análisis más profundos.
+
+---
 
 ## Clasificación de Variables
 
@@ -75,8 +109,10 @@ summary(movies) #<-- Exploración rápida:  - Mínimo, máximo, media, mediana (
 | revenue                   | Cuantitativa | Continua |
 | runtime                   | Cuantitativa | Continua |
 | voteAvg                   | Cuantitativa | Continua |
-| actorsPopularity          | Cuantitativa | Continua |
+| actorsPopularity_mean     | Cuantitativa | Continua |
 | releaseDate               | Cualitativa  | Ordinal  |
+
+actorsPopularity_mean es la variable que se generó para gestionar correctamente la variable actorsPopularity, la cual tenía los datos distribuidos como 1|123|3.23
 
 ## Análisis de Frecuencia/Distribución
 
@@ -205,7 +241,17 @@ lillie_results$releaseYear
 
 -   Los datos están sesgados hacia la derecha en el gráfico y el p-value es de 2.2e-16, por lo que la distribución no es normal.
 
-> Cabe mencionar que actorsPopularity no se le sacó distribución por cómo se tienen los datos, pues viene como un conjunto de números separados por \|.
+**actorsPopularity_mean**
+
+
+```{r}
+hist(movies_cuant$actorsPopularity_mean)
+lillie_results$actorsPopularity_mean
+```
+
+-   Los datos se ven sesgados a la izquierda, y con un p-value de 2.2e-16 se puede confirmar que no se distribuyen normalmente.
+
+> Ninguno de las variables presentadas está distribuida normalmente.
 
 ------------------------------------------------------------------------
 
@@ -213,16 +259,49 @@ lillie_results$releaseYear
 
 ```{r}
 freqs <- lapply(movies_cual, table)
-freqs$genres
-freqs$homePage
-freqs$productionCompany
 freqs$productionCompanyCountry
+```
+
+---
+
+```{r}
 freqs$video
+```
+
+---
+
+```{r}
 freqs$director
-freqs$actors
-freqs$actorsCharacter
+```
+
+---
+
+```{r}
 freqs$originalTitle
+```
+
+---
+
+```{r}
 freqs$title
+```
+
+---
+
+```{r}
 freqs$originalLanguage
+```
+
+---
+
+```{r}
 freqs$releaseDate
 ```
+
+---
+
+Las frecuencias de variables multivalor (cuyas observaciones estaban separadas por '|'), se decidió no incluirlas en las tablas de frecuencia por su estructura. Asimismo, se omitió la variable homePage, al ser algo que no aportaba valor al análisis a realizar, además de ser único para cada película.
+
+PREGUNTAR A ERICK SI QUITAMOS LAS DE TITLE
+
+---
