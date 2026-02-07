@@ -32,10 +32,10 @@ split_pipe_num <- function(x) {
 
 safe_mean <- function(x) if (length(x) == 0) NA_real_ else mean(x, na.rm = TRUE)
 
-movies_raw <- read.csv(
+movies_raw <- readr::read_csv(
   "movies_2026.csv",
-  fileEncoding = "latin1",
-  stringsAsFactors = FALSE
+  locale = readr::locale(encoding = "latin1"),
+  show_col_types = FALSE
 )
 
 movies <- movies_raw %>%
@@ -253,48 +253,57 @@ lillie_results$actorsPopularity_mean
 
 ```{r}
 freqs <- lapply(movies_cual, table)
-freqs$productionCompanyCountry
+
+clean_freq <- function(x, top_n = 20) {
+  x <- x[!is.na(x)]
+  x <- trimws(x) 
+  x <- stringr::str_squish(x)    
+  x <- x[x != ""]                
+
+  df <- as.data.frame(table(x))
+  colnames(df) <- c("Value", "Count")
+
+  df %>%
+    arrange(desc(Count)) %>%
+    head(top_n)
+}
+
+clean_freq(movies_cual$productionCompanyCountry)
 ```
 
 ---
 
 ```{r}
-freqs$video
+clean_freq(movies_cual$video)
 ```
 
 ---
 
 ```{r}
-freqs$director
+clean_freq(movies_cual$director)
 ```
 
 ---
 
 ```{r}
-freqs$originalTitle
+clean_freq(movies_cual$title)
 ```
 
 ---
 
 ```{r}
-freqs$title
+clean_freq(movies_cual$originalLanguage)
 ```
 
 ---
 
 ```{r}
-freqs$originalLanguage
+clean_freq(movies_cual$releaseDate)
 ```
 
 ---
 
-```{r}
-freqs$releaseDate
-```
-
----
-
-Las frecuencias de variables multivalor (cuyas observaciones estaban separadas por '|'), se decidió no incluirlas en las tablas de frecuencia por su estructura. Asimismo, se omitió la variable homePage, al ser algo que no aportaba valor al análisis a realizar, además de ser único para cada película.
+Las frecuencias de variables multivalor (cuyas observaciones estaban separadas por '|'), se decidió no incluirlas en las tablas de frecuencia por su estructura. Asimismo, se omitió la variable homePage, al ser algo que no aportaba valor al análisis a realizar, además de ser único para cada película. Para las tablas de frecuencia se excluyeron valores faltantes y vacíos. Debido a la alta cardinalidad de algunas variables, se presentan únicamente los 20 valores más frecuentes para facilitar la interpretación.
 
 ---
 
