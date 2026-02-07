@@ -311,6 +311,79 @@ Las frecuencias de variables multivalor (cuyas observaciones estaban separadas p
 
 ---
 
+#### 4.1. ¿Cuáles son las 10 películas que contaron con más presupuesto?
+
+```{r}
+top10_budget <- movies[order(movies$budget, decreasing = TRUE), c("title", "budget")]
+
+head(top10_budget, 10)
+```
+
+---
+
+#### 4.2.¿Cuáles son las 10 películas que más ingresos tuvieron?
+
+```{r}
+top10_revenue <- movies[order(movies$revenue, decreasing = TRUE, na.last = TRUE),
+                         c("title", "revenue")]
+
+head(top10_revenue, 10)
+```
+
+---
+
+#### 4.3.¿Cuál es la película que más votos tuvo?
+
+```{r}
+pelicula_mas_votos <- movies[order(movies$voteCount, decreasing = TRUE, na.last = TRUE),
+                              c("title", "voteCount")]
+
+head(pelicula_mas_votos, 1)
+```
+
+---
+
+#### 4.4 ¿Cuál es la peor película de acuerdo a los votos de todos los usuarios?
+
+```{r}
+peor_pelicula <- movies[
+  order(movies$voteAvg, decreasing = FALSE, na.last = TRUE),
+  c("title", "voteAvg")
+]
+
+head(peor_pelicula, 1)
+```
+
+---
+
+#### 4.5. ¿Cuántas películas se hicieron en cada año? ¿En qué año se hicieron más películas? Haga un gráfico de barras
+
+```{r}
+
+pelis_por_anio <- table(movies$releaseYear)
+
+anio_mas_peliculas <- data.frame(
+  Anio = names(pelis_por_anio),
+  Cantidad = as.vector(pelis_por_anio)
+)[which.max(pelis_por_anio), ]
+
+barplot(
+  pelis_por_anio,
+  main = "Cantidad de películas por año",
+  xlab = "Año de lanzamiento",
+  ylab = "Número de películas",
+  las = 2
+)
+```
+
+El año con más películas es:
+
+```{r}
+anio_mas_peliculas
+```
+
+---
+
 **Aclaración para gestión de preguntas de género principal**
 
 Para abordar estos problemas que van relacionados al género principal, lo que se realizó fue generar una columna nueva denominada "mainGenre", la idea es que para el género principal nos quedaremos con el primer elemento que se tenga en la columna de genres (cuyos datos vienen como Drama|Crime).
@@ -383,6 +456,8 @@ barplot(
 ```
 Entre las 20 películas recientes, los géneros principales fueron: drama, animación, y comedia. En el conjunto de datos, una vez más el género principal es drama, y seguido está comedia y documentales. Esto evidencia una preferencia a lo largo de la línea del tiempo en el mundo cinematográfico para el género de drama. Adicionalmente, si nos enfocamos en las 20 películas más largas, una vez más, drama aparece como el tercer género más común entre estas, por atrás únicamente de acción y documentales. En general, las películas tienden a enfocarse a un tono dramático.
 
+---
+
 #### 4.7 ¿Las películas de qué genero principal obtuvieron mayores ganancias?
 
 Para esta pregunta, el criterio fue dividir los datos acorde a su "mainGenre" para posteriormente sumar el revenue acorde a género. Utilizando estos datos se determina que el top 10 de géneros que más ganancias generan son:
@@ -413,6 +488,8 @@ barplot(
 ```
 
 Las mayores ganancias se presentan en los géneros de acción, aventura, comedia, drama, y animación.
+
+---
 
 #### 4.8 ¿La cantidad de actores influye en los ingresos de las películas? ¿se han hecho películas con más actores en los últimos años?
 
@@ -473,6 +550,8 @@ text(
 
 Se agruparon las películas en bloques de 20 años según releaseYear y se calculó el promedio de actorsAmount por película en cada bloque, excluyendo registros con actorsAmount = 0. Al hacer esto, se encontró que efectivamente, en los últimos años se tiene una mayor cantidad de actores en estas películas, lo que se puede atribuir al aumento en presupuesto en estos tiempos.
 
+---
+
 #### 4.9 ¿Es posible que la cantidad de hombres y mujeres en el reparto influya en la popularidad y los ingresos de las películas?
 
 ```{r}
@@ -505,6 +584,25 @@ Al comparar por grupos, se encontró que las películas con más hombres que muj
 
 ---
 
+#### 4.10. ¿Quiénes son los directores que hicieron las 20 películas mejor calificadas?
+
+```{r}
+top20_mejor_calificadas <- movies[
+  order(movies$voteAvg, decreasing = TRUE, na.last = TRUE),
+  c("title", "director", "voteAvg")
+]
+
+top20_mejor_calificadas <- head(top20_mejor_calificadas, 20)
+
+directores_top20 <- data.frame(
+  Director = unique(top20_mejor_calificadas$director)
+)
+
+directores_top20
+```
+
+---
+
 #### 4.11 ¿Cómo se correlacionan los presupuestos con los ingresos? ¿Los altos presupuestos significan altos ingresos? Haga los gráficos que necesite, histograma, diagrama de dispersión
 
 ```{r}
@@ -525,4 +623,7 @@ pearson_cor
 
 cor.test(budget_rev$budget, budget_rev$revenue, method = "pearson")
 ```
+
 En el gráfico se logró identificar una tendencia positiva entre ambas variables, con algunos puntos como claros outliers. Al obtener una correlación de 0.7228, se identifica una relación positiva entre moderada y alta entre el presupuesto y los ingresos. Sin embargo, la dispersión entre los datos puede sugerir que hayan más variables que puedan impactar los ingresos generados.
+
+---
