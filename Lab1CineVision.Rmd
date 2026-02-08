@@ -720,41 +720,70 @@ y los ingresos de taquilla, lo que indica que películas con actores más
 populares tienden a obtener mejores resultados comerciales.
 
 ---
-Preguntas extra
+# Preguntas extra
 
-5.1 ¿Las películas más largas tienden a generar mayores ingresos?
-
+# 5.1 ¿Las películas más largas tienden a generar mayores ingresos?
+```{r}
+plot(movies$runtime, movies$revenue,
+     xlab = "Duración (minutos)",
+     ylab = "Ingresos",
+     main = "Duración vs Ingresos")
+```
 No se observa una relación fuerte entre la duración de una película
 y sus ingresos. Películas largas y cortas pueden tener tanto
 altos como bajos ingresos, por lo que la duración no parece ser
 un factor determinante del éxito comercial.
+---
 
-5.2 ¿El número de países de producción influye en los ingresos?
-
+#5.2 ¿El número de países de producción influye en los ingresos?
+```{r}
+boxplot(revenue ~ productionCountriesAmount, data = movies,
+        xlab = "Cantidad de países de producción",
+        ylab = "Ingresos",
+        main = "Ingresos según países de producción")
+```
 Las películas producidas en varios países tienden a presentar
 mayores ingresos medianos, lo que sugiere que las coproducciones
 internacionales pueden ampliar el alcance comercial.
-
-5.3 ¿Las películas con más compañías productoras generan mayores ingresos?
-
+---
+#5.3 ¿Las películas con más compañías productoras generan mayores ingresos?
+```{r}
+plot(movies$productionCoAmount, movies$revenue,
+     xlab = "Cantidad de compañías productoras",
+     ylab = "Ingresos",
+     main = "Compañías productoras vs Ingresos")
+```
 Existe una ligera tendencia positiva entre la cantidad de compañías
 productoras y los ingresos, indicando que mayores alianzas
 pueden facilitar mejores resultados financieros.
-
-5.4 ¿El idioma original de la película influye en su popularidad?   
+---
+#5.4 ¿El idioma original de la película influye en su popularidad?   
+```{r}
+aggregate(popularity ~ originalLanguage, data = movies, mean)
 
 Se observan diferencias claras en la popularidad promedio según
 el idioma original. Algunos idiomas concentran mayores niveles
 de popularidad, posiblemente por su mayor alcance internacional.
-
-5.5 ¿Las películas con más géneros tienden a ser más populares?
-
+```
+---
+#5.5 ¿Las películas con más géneros tienden a ser más populares?
+```{r}
+plot(movies$genresAmount, movies$popularity,
+     xlab = "Cantidad de géneros",
+     ylab = "Popularidad",
+     main = "Cantidad de géneros vs Popularidad")
+```
 No existe una relación fuerte entre la cantidad de géneros y la
 popularidad. Las películas con uno o varios géneros pueden
 alcanzar niveles similares de popularidad.
-
-5.6 ¿Las películas con mayor número de votos tienden a tener mejores calificaciones promedio?
-
+---
+#5.6 ¿Las películas con mayor número de votos tienden a tener mejores calificaciones promedio?
+```{r}
+plot(movies$voteCount, movies$voteAvg,
+     xlab = "Cantidad de votos",
+     ylab = "Calificación promedio",
+     main = "Votos vs Calificación promedio")
+```
 Se observa una relación moderada donde las películas con más votos
 tienden a estabilizar sus calificaciones promedio, lo que indica
 mayor consenso del público conforme aumenta la cantidad de votaciones.
