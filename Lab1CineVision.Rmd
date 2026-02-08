@@ -41,7 +41,7 @@ movies_raw <- readr::read_csv(
 movies <- movies_raw %>%
   mutate(
     # actorsPopularity -> métricas (para manejar 3.45|12.31|...)
-    actorsPopularity_mean = sapply(lapply(actorsPopularity, split_pipe_num), safe_mean),
+    actorsPopularity_mean = sapply(lapply(actorsPopularity, split_pipe_num), safe_mean)
   )
 
 movies_cuant <- movies[sapply(movies, is.numeric)]
@@ -406,6 +406,11 @@ movies <- movies %>%
 movies <- movies %>%
   mutate(releaseDateParsed = as.Date(releaseDate))
 
+top20_recent <- movies %>%
+  filter(!is.na(releaseDateParsed)) %>%
+  arrange(desc(releaseDateParsed)) %>%
+  slice_head(n = 20)
+
 top20_genre_counts <- top20_recent %>%
   filter(!is.na(mainGenre), mainGenre != "") %>%
   count(mainGenre, sort = TRUE)
@@ -580,7 +585,7 @@ cast_impact <- movies %>%
 cast_impact
 ```
 
-Al comparar por grupos, se encontró que las películas con más hombres que mujeres, tienen en promedio mayor popularidad e ingresos que las películas con un reparto balanceado (misma cantidad de actrices que actores) y que las que tienen mayor cantidad de hombres. Por lo que, puede existir un impacto positivo en cuanto a visibilidad y ganancias de las películas si predomina la cantidad de actores en el reparto.
+Al comparar por grupos, se encontró que las películas con más hombres que mujeres presentan en promedio mayor popularidad e ingresos que las películas con un reparto balanceado y que las que tienen más mujeres que hombres. Esto sugiere una posible asociación, aunque no implica causalidad.
 
 ---
 
@@ -627,49 +632,46 @@ cor.test(budget_rev$budget, budget_rev$revenue, method = "pearson")
 En el gráfico se logró identificar una tendencia positiva entre ambas variables, con algunos puntos como claros outliers. Al obtener una correlación de 0.7228, se identifica una relación positiva entre moderada y alta entre el presupuesto y los ingresos. Sin embargo, la dispersión entre los datos puede sugerir que hayan más variables que puedan impactar los ingresos generados.
 
 ---
-# 4.12 ¿Se asocian ciertos meses de lanzamiento con mejores ingresos?
+#### 4.12 ¿Se asocian ciertos meses de lanzamiento con mejores ingresos?
+
 ```{r}
+movies_dates <- movies %>%
+  mutate(releaseDateParsed = as.Date(releaseDate)) %>%
+  filter(!is.na(releaseDateParsed), !is.na(revenue), revenue > 0)
+
 boxplot(
-  revenue ~ format(as.Date(releaseDate), "%m"),
-  data = movies,
+  revenue ~ format(releaseDateParsed, "%m"),
+  data = movies_dates,
   xlab = "Mes de lanzamiento",
   ylab = "Ingresos",
   main = "Ingresos por mes de lanzamiento"
 )
 ```
-Conclusión:
 
-El diagrama de cajas muestra que los ingresos varían según el mes de lanzamiento.
-Se observan meses con medianas más altas y mayor dispersión de ingresos,
-lo que sugiere que el momento del estreno puede influir en el desempeño comercial
-de las películas.
+El diagrama de cajas muestra que los ingresos varían según el mes de lanzamiento. Se observan meses con medianas más altas y mayor dispersión de ingresos, lo que sugiere que el momento del estreno puede influir en el desempeño comercial de las películas.
 
 ---
-# 4.13 ¿En qué meses se han visto los lanzamientos con mejores ingresos y cuántas películas, en promedio, se lanzan por mes?
-# Ingreso promedio por mes de lanzamiento
+#### 4.13 ¿En qué meses se han visto los lanzamientos con mejores ingresos y cuántas películas, en promedio, se lanzan por mes? Ingreso promedio por mes de lanzamiento
 
 ```{r}
 aggregate(
-  revenue ~ format(as.Date(releaseDate), "%m"),
-  data = movies,
+  revenue ~ format(releaseDateParsed, "%m"),
+  data = movies_dates,
   mean
 )
 
-# Cantidad de películas por mes
-table(format(as.Date(movies$releaseDate), "%m"))
+table(format(movies_dates$releaseDateParsed, "%m"))
 
-# Promedio de películas lanzadas por mes
-mean(table(format(as.Date(movies$releaseDate), "%m")))
+mean(table(format(movies_dates$releaseDateParsed, "%m")))
 ```
 
----
-El ingreso promedio varía entre los distintos meses del año, observándose
-algunos meses con mejores resultados económicos. La cantidad de películas
-lanzadas por mes es relativamente constante, lo que indica una distribución
-uniforme de estrenos a lo largo del año.
+
+El ingreso promedio varía entre los distintos meses del año, observándose algunos meses con mejores resultados económicos. La cantidad de películas lanzadas por mes es relativamente constante, lo que indica una distribución uniforme de estrenos a lo largo del año.
+
 ---
 
-# 4.14 ¿Cómo se correlacionan las calificaciones con el éxito comercial?
+#### 4.14 ¿Cómo se correlacionan las calificaciones con el éxito comercial?
+
 ```{r}
 # Correlación entre calificación promedio y ingresos
 cor(movies$voteAvg, movies$revenue, use = "complete.obs")
@@ -680,12 +682,12 @@ plot(movies$voteAvg, movies$revenue,
      ylab = "Ingresos",
      main = "Calificación promedio vs Ingresos")
 ```
+La correlación entre la calificación promedio y los ingresos es baja, lo que indica que una mejor calificación no garantiza necesariamente un mayor éxito comercial en taquilla.
 
-La correlación entre la calificación promedio y los ingresos es baja,
-lo que indica que una mejor calificación no garantiza necesariamente
-un mayor éxito comercial en taquilla.
 ---
-# 4.15 ¿Qué estrategias de marketing, como videos promocionales o páginas oficiales, generan mejores resultados?
+
+#### 4.15 ¿Qué estrategias de marketing, como videos promocionales o páginas oficiales, generan mejores resultados?
+
 ```{r}
 # Ingresos promedio según la existencia de video promocional
 aggregate(revenue ~ video, data = movies, mean)
@@ -693,17 +695,17 @@ aggregate(revenue ~ video, data = movies, mean)
 # Ingresos promedio según la existencia de página oficial
 aggregate(revenue ~ (homePage != ""), data = movies, mean)
 ```
-Las películas que cuentan con videos promocionales o con una página oficial
-presentan mayores ingresos promedio, lo que sugiere que las estrategias
-de marketing digital influyen positivamente en el desempeño comercial.
+Las películas que cuentan con videos promocionales o con una página oficial presentan mayores ingresos promedio, lo que sugiere que las estrategias de marketing digital influyen positivamente en el desempeño comercial.
 
 ---
-# 4.16 ¿La popularidad del elenco está directamente correlacionada con el éxito de taquilla?
+
+#### 4.16 ¿La popularidad del elenco está directamente correlacionada con el éxito de taquilla?
+
 ```{r}
 # Cálculo de la popularidad promedio del elenco sin modificar el dataset
 actors_popularity_avg <- sapply(
-  movies$actorsPopularity,
-  function(x) mean(as.numeric(unlist(strsplit(x, "\\|"))), na.rm = TRUE)
+  lapply(movies$actorsPopularity, split_pipe_num),
+  safe_mean
 )
 
 # Correlación entre popularidad del elenco e ingresos
@@ -715,75 +717,72 @@ plot(actors_popularity_avg, movies$revenue,
      ylab = "Ingresos",
      main = "Popularidad del elenco vs Ingresos")
 ```
-Se observa una relación positiva entre la popularidad promedio del elenco
-y los ingresos de taquilla, lo que indica que películas con actores más
-populares tienden a obtener mejores resultados comerciales.
+Se observa una relación positiva entre la popularidad promedio del elenco y los ingresos de taquilla, lo que indica que películas con actores más populares tienden a obtener mejores resultados comerciales.
 
 ---
-# Preguntas extra
 
-# 5.1 ¿Las películas más largas tienden a generar mayores ingresos?
+## Preguntas extra
+
+#### 5.1 ¿Las películas más largas tienden a generar mayores ingresos?
+
 ```{r}
 plot(movies$runtime, movies$revenue,
      xlab = "Duración (minutos)",
      ylab = "Ingresos",
      main = "Duración vs Ingresos")
 ```
-No se observa una relación fuerte entre la duración de una película
-y sus ingresos. Películas largas y cortas pueden tener tanto
-altos como bajos ingresos, por lo que la duración no parece ser
-un factor determinante del éxito comercial.
+No se observa una relación fuerte entre la duración de una película y sus ingresos. Películas largas y cortas pueden tener tanto altos como bajos ingresos, por lo que la duración no parece ser un factor determinante del éxito comercial.
+
 ---
 
-#5.2 ¿El número de países de producción influye en los ingresos?
+#### 5.2 ¿El número de países de producción influye en los ingresos?
+
 ```{r}
 boxplot(revenue ~ productionCountriesAmount, data = movies,
         xlab = "Cantidad de países de producción",
         ylab = "Ingresos",
         main = "Ingresos según países de producción")
 ```
-Las películas producidas en varios países tienden a presentar
-mayores ingresos medianos, lo que sugiere que las coproducciones
-internacionales pueden ampliar el alcance comercial.
+Las películas producidas en varios países tienden a presentar mayores ingresos medianos, lo que sugiere que las coproducciones internacionales pueden ampliar el alcance comercial.
 ---
-#5.3 ¿Las películas con más compañías productoras generan mayores ingresos?
+#### 5.3 ¿Las películas con más compañías productoras generan mayores ingresos?
 ```{r}
 plot(movies$productionCoAmount, movies$revenue,
      xlab = "Cantidad de compañías productoras",
      ylab = "Ingresos",
      main = "Compañías productoras vs Ingresos")
 ```
-Existe una ligera tendencia positiva entre la cantidad de compañías
-productoras y los ingresos, indicando que mayores alianzas
-pueden facilitar mejores resultados financieros.
+Existe una ligera tendencia positiva entre la cantidad de compañías productoras y los ingresos, indicando que mayores alianzas pueden facilitar mejores resultados financieros.
+
 ---
-#5.4 ¿El idioma original de la película influye en su popularidad?   
+#### 5.4 ¿El idioma original de la película influye en su popularidad?   
 ```{r}
 aggregate(popularity ~ originalLanguage, data = movies, mean)
-
-Se observan diferencias claras en la popularidad promedio según
-el idioma original. Algunos idiomas concentran mayores niveles
-de popularidad, posiblemente por su mayor alcance internacional.
 ```
+Se observan diferencias claras en la popularidad promedio según el idioma original. Algunos idiomas concentran mayores niveles de popularidad, posiblemente por su mayor alcance internacional.
+
 ---
-#5.5 ¿Las películas con más géneros tienden a ser más populares?
+
+#### 5.5 ¿Las películas con más géneros tienden a ser más populares?
+
 ```{r}
 plot(movies$genresAmount, movies$popularity,
      xlab = "Cantidad de géneros",
      ylab = "Popularidad",
      main = "Cantidad de géneros vs Popularidad")
 ```
-No existe una relación fuerte entre la cantidad de géneros y la
-popularidad. Las películas con uno o varios géneros pueden
-alcanzar niveles similares de popularidad.
+
+No existe una relación fuerte entre la cantidad de géneros y la popularidad. Las películas con uno o varios géneros pueden alcanzar niveles similares de popularidad.
+
 ---
-#5.6 ¿Las películas con mayor número de votos tienden a tener mejores calificaciones promedio?
+
+#### 5.6 ¿Las películas con mayor número de votos tienden a tener mejores calificaciones promedio?
+
 ```{r}
 plot(movies$voteCount, movies$voteAvg,
      xlab = "Cantidad de votos",
      ylab = "Calificación promedio",
      main = "Votos vs Calificación promedio")
 ```
-Se observa una relación moderada donde las películas con más votos
-tienden a estabilizar sus calificaciones promedio, lo que indica
-mayor consenso del público conforme aumenta la cantidad de votaciones.
+
+Se observa una relación moderada donde las películas con más votos tienden a estabilizar sus calificaciones promedio, lo que indica mayor consenso del público conforme aumenta la cantidad de votaciones.
