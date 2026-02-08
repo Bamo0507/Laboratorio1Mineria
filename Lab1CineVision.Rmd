@@ -627,3 +627,94 @@ cor.test(budget_rev$budget, budget_rev$revenue, method = "pearson")
 En el gráfico se logró identificar una tendencia positiva entre ambas variables, con algunos puntos como claros outliers. Al obtener una correlación de 0.7228, se identifica una relación positiva entre moderada y alta entre el presupuesto y los ingresos. Sin embargo, la dispersión entre los datos puede sugerir que hayan más variables que puedan impactar los ingresos generados.
 
 ---
+# 4.12 ¿Se asocian ciertos meses de lanzamiento con mejores ingresos?
+```{r}
+boxplot(
+  revenue ~ format(as.Date(releaseDate), "%m"),
+  data = movies,
+  xlab = "Mes de lanzamiento",
+  ylab = "Ingresos",
+  main = "Ingresos por mes de lanzamiento"
+)
+```
+Conclusión:
+
+El diagrama de cajas muestra que los ingresos varían según el mes de lanzamiento.
+Se observan meses con medianas más altas y mayor dispersión de ingresos,
+lo que sugiere que el momento del estreno puede influir en el desempeño comercial
+de las películas.
+
+---
+# 4.13 ¿En qué meses se han visto los lanzamientos con mejores ingresos y cuántas películas, en promedio, se lanzan por mes?
+# Ingreso promedio por mes de lanzamiento
+
+```{r}
+aggregate(
+  revenue ~ format(as.Date(releaseDate), "%m"),
+  data = movies,
+  mean
+)
+
+# Cantidad de películas por mes
+table(format(as.Date(movies$releaseDate), "%m"))
+
+# Promedio de películas lanzadas por mes
+mean(table(format(as.Date(movies$releaseDate), "%m")))
+```
+
+---
+El ingreso promedio varía entre los distintos meses del año, observándose
+algunos meses con mejores resultados económicos. La cantidad de películas
+lanzadas por mes es relativamente constante, lo que indica una distribución
+uniforme de estrenos a lo largo del año.
+---
+
+# 4.14 ¿Cómo se correlacionan las calificaciones con el éxito comercial?
+```{r}
+# Correlación entre calificación promedio y ingresos
+cor(movies$voteAvg, movies$revenue, use = "complete.obs")
+
+# Gráfico de dispersión
+plot(movies$voteAvg, movies$revenue,
+     xlab = "Calificación promedio",
+     ylab = "Ingresos",
+     main = "Calificación promedio vs Ingresos")
+```
+
+La correlación entre la calificación promedio y los ingresos es baja,
+lo que indica que una mejor calificación no garantiza necesariamente
+un mayor éxito comercial en taquilla.
+---
+# 4.15 ¿Qué estrategias de marketing, como videos promocionales o páginas oficiales, generan mejores resultados?
+```{r}
+# Ingresos promedio según la existencia de video promocional
+aggregate(revenue ~ video, data = movies, mean)
+
+# Ingresos promedio según la existencia de página oficial
+aggregate(revenue ~ (homePage != ""), data = movies, mean)
+```
+Las películas que cuentan con videos promocionales o con una página oficial
+presentan mayores ingresos promedio, lo que sugiere que las estrategias
+de marketing digital influyen positivamente en el desempeño comercial.
+
+---
+# 4.16 ¿La popularidad del elenco está directamente correlacionada con el éxito de taquilla?
+```{r}
+# Cálculo de la popularidad promedio del elenco sin modificar el dataset
+actors_popularity_avg <- sapply(
+  movies$actorsPopularity,
+  function(x) mean(as.numeric(unlist(strsplit(x, "\\|"))), na.rm = TRUE)
+)
+
+# Correlación entre popularidad del elenco e ingresos
+cor(actors_popularity_avg, movies$revenue, use = "complete.obs")
+
+# Gráfico de dispersión
+plot(actors_popularity_avg, movies$revenue,
+     xlab = "Popularidad promedio del elenco",
+     ylab = "Ingresos",
+     main = "Popularidad del elenco vs Ingresos")
+```
+Se observa una relación positiva entre la popularidad promedio del elenco
+y los ingresos de taquilla, lo que indica que películas con actores más
+populares tienden a obtener mejores resultados comerciales.
